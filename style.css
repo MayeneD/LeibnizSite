@@ -381,3 +381,71 @@ footer.rodape p {
     font-size: 16px;
   }
 }
+
+
+.titulo-clientes {
+  text-align: center;
+  margin: 40px 0 20px;
+}
+
+.titulo-clientes h1 {
+  font-size: 2em;
+  color: #003366;
+  margin-bottom: 10px;
+}
+
+.titulo-clientes p {
+  color: #555;
+  font-size: 1.1em;
+}
+
+.depoimentos {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 20px auto;
+  max-width: 900px;
+  padding: 0 20px;
+}
+
+.depoimentos article {
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-left: 4px solid #ff0000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.depoimentos blockquote {
+  font-style: italic;
+  margin-bottom: 10px;
+}
+
+.depoimentos .autor {
+  font-weight: bold;
+  color: #ff0000;
+}
+
+.logos-clientes {
+  margin: 40px auto;
+  text-align: center;
+}
+
+.logos-clientes h2 {
+  font-size: 1.8em;
+  margin-bottom: 20px;
+  color: #003366;
+}
+
+.grid-logos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+  padding: 0 20px;
+}
+
+.logo-cliente img {
+  max-width: 150px;
+  max-height: 100px;
+  object-fit: contain;
+}
