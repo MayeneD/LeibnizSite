@@ -1,169 +1,157 @@
+
 const wrapper = document.getElementById('carrossel-wrapper');
-let slides = Array.from(document.querySelectorAll('.slide'));
 
-let currentIndex = 1;
-let isDragging = false;
-let startX = 0;
-let currentTranslate = 0;
-let prevTranslate = 0;
-let animationID;
-let autoSlideInterval;
+if (wrapper) {
+  let slides = Array.from(document.querySelectorAll('.slide'));
 
-function cloneSlides() {
-  const firstClone = slides[0].cloneNode(true);
-  const lastClone = slides[slides.length - 1].cloneNode(true);
-  firstClone.classList.add('clone');
-  lastClone.classList.add('clone');
-  wrapper.appendChild(firstClone);
-  wrapper.insertBefore(lastClone, slides[0]);
-  slides = Array.from(document.querySelectorAll('.slide'));
-}
+  let currentIndex = 1;
+  let isDragging = false;
+  let startX = 0;
+  let currentTranslate = 0;
+  let prevTranslate = 0;
+  let animationID;
+  let autoSlideInterval;
 
-function getSlideWidth() {
-  return slides[0].clientWidth;
-}
-
-function setPosition() {
-  wrapper.style.transform = `translateX(${currentTranslate}px)`;
-}
-
-function animation() {
-  setPosition();
-  if (isDragging) requestAnimationFrame(animation);
-}
-
-function setSlidePosition(jump = false) {
-  const slideWidth = getSlideWidth();
-  currentTranslate = currentIndex * -slideWidth;
-  prevTranslate = currentTranslate;
-  if (jump) {
-    wrapper.style.transition = "none";
-  } else {
-    wrapper.style.transition = "transform 0.4s ease-in-out";
+  function cloneSlides() {
+    const firstClone = slides[0].cloneNode(true);
+    const lastClone = slides[slides.length - 1].cloneNode(true);
+    firstClone.classList.add('clone');
+    lastClone.classList.add('clone');
+    wrapper.appendChild(firstClone);
+    wrapper.insertBefore(lastClone, slides[0]);
+    slides = Array.from(document.querySelectorAll('.slide'));
   }
-  setPosition();
-}
 
-function checkInfiniteLoop() {
-  if (slides[currentIndex].classList.contains('clone')) {
-    wrapper.style.transition = 'none';
-    currentIndex = currentIndex === 0 ? slides.length - 2 : 1;
-    setTimeout(() => {
-      setSlidePosition(true);
-    }, 50);
+  function getSlideWidth() {
+    return slides[0].clientWidth;
   }
-}
 
-function setupCarousel() {
-  cloneSlides();
-  setSlidePosition(true);
+  function setPosition() {
+    wrapper.style.transform = `translateX(${currentTranslate}px)`;
+  }
 
-  startAutoSlide();
-}
+  function animation() {
+    setPosition();
+    if (isDragging) requestAnimationFrame(animation);
+  }
 
-function startAutoSlide() {
-  autoSlideInterval = setInterval(() => {
-    if (currentIndex < slides.length - 1) {
-      currentIndex++;
+  function setSlidePosition(jump = false) {
+    const slideWidth = getSlideWidth();
+    currentTranslate = currentIndex * -slideWidth;
+    prevTranslate = currentTranslate;
+    if (jump) {
+      wrapper.style.transition = "none";
     } else {
-      currentIndex = 1; // Retorna ao primeiro slide
+      wrapper.style.transition = "transform 0.4s ease-in-out";
     }
-    setSlidePosition();
-  }, 15000); // Altere o valor conforme o intervalo desejado (3000ms = 3 segundos)
-}
+    setPosition();
+  }
 
-function stopAutoSlide() {
-  clearInterval(autoSlideInterval);
-}
+  function checkInfiniteLoop() {
+    if (slides[currentIndex].classList.contains('clone')) {
+      wrapper.style.transition = 'none';
+      currentIndex = currentIndex === 0 ? slides.length - 2 : 1;
+      setTimeout(() => {
+        setSlidePosition(true);
+      }, 50);
+    }
+  }
 
+  function setupCarousel() {
+    cloneSlides();
+    setSlidePosition(true);
+    startAutoSlide();
+  }
 
-// Mouse events
-wrapper.addEventListener('mousedown', (e) => {
-  isDragging = true;
-  startX = e.pageX - wrapper.offsetLeft;
-  animationID = requestAnimationFrame(animation);
-});
+  function startAutoSlide() {
+    autoSlideInterval = setInterval(() => {
+      if (currentIndex < slides.length - 1) {
+        currentIndex++;
+      } else {
+        currentIndex = 1;
+      }
+      setSlidePosition();
+    }, 15000);
+  }
 
-wrapper.addEventListener('mouseup', () => {
-  isDragging = false;
-  cancelAnimationFrame(animationID);
-  const movedBy = currentTranslate - prevTranslate;
+  function stopAutoSlide() {
+    clearInterval(autoSlideInterval);
+  }
 
-  if (movedBy < -100 && currentIndex < slides.length - 1) currentIndex++;
-  if (movedBy > 100 && currentIndex > 0) currentIndex--;
+  // Mouse events
+  wrapper.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    startX = e.pageX - wrapper.offsetLeft;
+    animationID = requestAnimationFrame(animation);
+  });
 
-  setSlidePosition();
-  startAutoSlide(); 
-});
-
-wrapper.addEventListener('mouseleave', () => {
-  if (isDragging) {
+  wrapper.addEventListener('mouseup', () => {
     isDragging = false;
     cancelAnimationFrame(animationID);
+    const movedBy = currentTranslate - prevTranslate;
+
+    if (movedBy < -100 && currentIndex < slides.length - 1) currentIndex++;
+    if (movedBy > 100 && currentIndex > 0) currentIndex--;
+
     setSlidePosition();
-  }
-});
+    startAutoSlide();
+  });
 
-wrapper.addEventListener('mousemove', (e) => {
-  if (!isDragging) return;
-  const currentX = e.pageX - wrapper.offsetLeft;
-  const moveX = prevTranslate + currentX - startX;
-  const maxTranslate = 0;
-  const minTranslate = -(slides.length - 1) * getSlideWidth();
-  currentTranslate = Math.max(Math.min(moveX, maxTranslate), minTranslate);
-});
+  wrapper.addEventListener('mouseleave', () => {
+    if (isDragging) {
+      isDragging = false;
+      cancelAnimationFrame(animationID);
+      setSlidePosition();
+    }
+  });
 
-// Touch events
-wrapper.addEventListener('touchstart', (e) => {
-  e.preventDefault();
-  isDragging = true;
-  startX = e.touches[0].clientX;
-  animationID = requestAnimationFrame(animation);
-  stopAutoSlide();
-}, { passive: false });
+  wrapper.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const currentX = e.pageX - wrapper.offsetLeft;
+    const moveX = prevTranslate + currentX - startX;
+    const maxTranslate = 0;
+    const minTranslate = -(slides.length - 1) * getSlideWidth();
+    currentTranslate = Math.max(Math.min(moveX, maxTranslate), minTranslate);
+  });
 
-wrapper.addEventListener('touchend', () => {
-  isDragging = false;
-  cancelAnimationFrame(animationID);
-  const movedBy = currentTranslate - prevTranslate;
+  // Touch events
+  wrapper.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    isDragging = true;
+    startX = e.touches[0].clientX;
+    animationID = requestAnimationFrame(animation);
+    stopAutoSlide();
+  }, { passive: false });
 
-  if (movedBy < -100 && currentIndex < slides.length - 1) currentIndex++;
-  if (movedBy > 100 && currentIndex > 0) currentIndex--;
+  wrapper.addEventListener('touchend', () => {
+    isDragging = false;
+    cancelAnimationFrame(animationID);
+    const movedBy = currentTranslate - prevTranslate;
 
-  setSlidePosition();
-  startAutoSlide(); 
-});
+    if (movedBy < -100 && currentIndex < slides.length - 1) currentIndex++;
+    if (movedBy > 100 && currentIndex > 0) currentIndex--;
 
-wrapper.addEventListener('touchmove', (e) => {
-  if (!isDragging) return;
-  const currentX = e.touches[0].clientX;
-  const moveX = prevTranslate + currentX - startX;
-  const maxTranslate = 0;
-  const minTranslate = -(slides.length - 1) * getSlideWidth();
-  currentTranslate = Math.max(Math.min(moveX, maxTranslate), minTranslate);
-});
+    setSlidePosition();
+    startAutoSlide();
+  });
 
-// Detecta final/início e reseta para o slide real
-wrapper.addEventListener('transitionend', checkInfiniteLoop);
+  wrapper.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    const currentX = e.touches[0].clientX;
+    const moveX = prevTranslate + currentX - startX;
+    const maxTranslate = 0;
+    const minTranslate = -(slides.length - 1) * getSlideWidth();
+    currentTranslate = Math.max(Math.min(moveX, maxTranslate), minTranslate);
+  });
 
-// Responsividade
-window.addEventListener('resize', () => {
-  setSlidePosition(true);
-});
+  wrapper.addEventListener('transitionend', checkInfiniteLoop);
 
-window.addEventListener('load', setupCarousel);
+  window.addEventListener('resize', () => {
+    setSlidePosition(true);
+  });
 
-
-window.addEventListener('scroll', () => {
-  const menuContainer = document.querySelector('.menu-container');
-  
-  // Verifique se o scroll passou de 50px
-  if (window.scrollY > 50) {
-    menuContainer.classList.add('navbar-scrolled');
-  } else {
-    menuContainer.classList.remove('navbar-scrolled');
-  }
-});
+  window.addEventListener('load', setupCarousel);
+}
 
 
 
@@ -198,5 +186,3 @@ window.addEventListener('load', () => {
     menuContainer.classList.remove('navbar-scrolled');
   }
 });
-
-
